@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini Tetris</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111;color:#eee;font:14px system-ui}
+  main{text-align:center}h1{margin:0 0 8px;font-size:20px}canvas{display:block;border:2px solid #555;background:#000}
+  p{margin:8px 0}button{padding:6px 12px;border:0;border-radius:5px;font-weight:700;cursor:pointer}
+</style>
+<main>
+  <h1>Mini Tetris</h1>
+  <canvas id="game" width="200" height="400"></canvas>
+  <p>점수 <b id="score">0</b> · ← → 이동 · ↑ 회전 · ↓ 내리기 · Space 바로 내리기</p>
+  <button id="restart">다시 시작</button>
+</main>
+<script>
+const C=document.querySelector('#game'),X=C.getContext('2d'),S=document.querySelector('#score'),W=10,H=20,Z=20;
+const P=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]];
+const K=['#00d9ff','#ffd500','#b84cff','#3977ff','#ff8c19','#39d353','#ff3e55'];
+let board,piece,timer,score,over;
+function fresh(){return Array.from({length:H},()=>Array(W).fill(''))}
+function spawn(){let n=Math.random()*P.length|0;piece={m:P[n].map(r=>[...r]),x:3,y:0,c:K[n]};if(hit(piece.x,piece.y,piece.m)){over=true;clearInterval(timer)}}
+function hit(x,y,m){return m.some((r,j)=>r.some((v,i)=>v&&(x+i<0||x+i>=W||y+j>=H||(y+j>=0&&board[y+j][x+i]))))}
+function move(dx,dy){if(!over&&!hit(piece.x+dx,piece.y+dy,piece.m)){piece.x+=dx;piece.y+=dy;return true}if(dy)lock();return false}
+function rotate(){let m=piece.m[0].map((_,i)=>piece.m.map(r=>r[i]).reverse());if(!over&&!hit(piece.x,piece.y,m))piece.m=m}
+function lock(){piece.m.forEach((r,j)=>r.forEach((v,i)=>{if(v&&piece.y+j>=0)board[piece.y+j][piece.x+i]=piece.c}));let n=0;for(let y=H-1;y>=0;y--)if(board[y].every(Boolean)){board.splice(y,1);board.unshift(Array(W).fill(''));n++;y++}score+=n*n*100;S.textContent=score;spawn()}
+function drop(){while(move(0,1));draw()}
+function cell(x,y,c){X.fillStyle=c;X.fillRect(x*Z+1,y*Z+1,Z-2,Z-2)}
+function draw(){X.clearRect(0,0,C.width,C.height);board.forEach((r,y)=>r.forEach((c,x)=>c&&cell(x,y,c)));piece?.m.forEach((r,j)=>r.forEach((v,i)=>v&&cell(piece.x+i,piece.y+j,piece.c)));if(over){X.fillStyle='#000c';X.fillRect(0,170,200,60);X.fillStyle='#fff';X.font='bold 20px system-ui';X.textAlign='center';X.fillText('GAME OVER',100,205)}}
+function start(){clearInterval(timer);board=fresh();score=0;over=false;S.textContent=0;spawn();draw();timer=setInterval(()=>{move(0,1);draw()},450)}
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();if(e.code==='ArrowLeft')move(-1,0);if(e.code==='ArrowRight')move(1,0);if(e.code==='ArrowDown')move(0,1);if(e.code==='ArrowUp')rotate();if(e.code==='Space')drop();draw()});
+document.querySelector('#restart').onclick=start;start();
+</script>
+</html>
