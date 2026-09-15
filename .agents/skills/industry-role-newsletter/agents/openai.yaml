@@ -1,0 +1,4 @@
+interface:
+  display_name: "직무 전환 취업 리서치"
+  short_description: "최신 산업·직무 변화를 서류·포트폴리오·면접에 연결"
+  default_prompt: "$industry-role-newsletter를 사용해 금융·핀테크 산업과 프로덕트 디자인 직무의 새로운 공고·현직자 글·실무 변화를 확인하고, 내 취업 준비에 활용할 내용으로 정리해 주세요."
